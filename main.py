@@ -14,6 +14,7 @@ diretorio = os.getcwd()
 #caminho do chrome drive na minha maquina
 chrome_driver = r'C:\Program Files\chromedriver_win32\chromedriver.exe'
 
+#Opções do navegador Chrome
 options = webdriver.ChromeOptions()
 options.add_experimental_option('prefs', {
     'download.default_directory': diretorio,
@@ -24,11 +25,11 @@ options.add_experimental_option('prefs', {
 
 
 #criando o navegador
-driver = webdriver.Chrome(executable_path=chrome_driver, chrome_options=options)
+driver = webdriver.Chrome(executable_path=chrome_driver, options=options)
 
 notas_fiscais = pd.read_excel('NotasEmitir.xlsx')
 
-
+#Login
 def login():
     user = driver.find_element(By.XPATH, '/html/body/div/form/input[1]')
     password = driver.find_element(By.XPATH, '/html/body/div/form/input[2]')
@@ -42,7 +43,7 @@ def login():
         driver.find_element(By.XPATH, '/html/body/div/form/button').click()
 
 
-
+#Preencher informações do destinatário
 def preencher_notas_destinatário(fantasia, endereco, bairro, municipio, cep,uf, cnpj, desc_estadual ):
 
     try:
@@ -78,6 +79,7 @@ def preencher_notas_destinatário(fantasia, endereco, bairro, municipio, cep,uf,
         print(f'Erro no elemento {error}')
 
 
+#Preencher informações da mercadoria
 def preencher_notas_mercadoria(desc_prod_serv, quantidade, valor_unit, valor_total):
     try:
         driver.find_element(By.XPATH, '//*[@id="formulario"]/input[8]').send_keys(desc_prod_serv)
@@ -98,25 +100,18 @@ def preencher_notas_mercadoria(desc_prod_serv, quantidade, valor_unit, valor_tot
         print(f'Erro no elemento {error}')
 
 
+#limpar campos
 def limpar_campos():
-        elementos = driver.find_elements(By.XPATH, '//*[@id="nome"]')
+        inputs = driver.find_elements(By.TAG_NAME, 'input')
 
-        elementos[0].clear()
-        elementos[1].clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[3]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[4]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[5]').clear()
+        for input in inputs:
+            input.clear()
 
         select = driver.find_element(By.XPATH, '//*[@id="formulario"]/select')
         elemento_select = Select(select)
         elemento_select.select_by_index(0)
 
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[6]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[7]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[8]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[9]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[10]').clear()
-        driver.find_element(By.XPATH, '//*[@id="formulario"]/input[11]').clear()
+   
         
         
 
@@ -130,7 +125,7 @@ def main():
 
     for i in range(len(notas_fiscais)):
 
-        #DeSTINATARIO
+        # DESTINATÁRIO
         nome_fantasia = notas_fiscais.iloc[i]['Cliente']
         endereco = notas_fiscais.iloc[i]['Endereço']
         bairro = notas_fiscais.iloc[i]['Bairro']
